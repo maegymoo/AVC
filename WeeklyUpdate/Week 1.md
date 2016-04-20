@@ -7,3 +7,6 @@
 - [ ] Henk:
 - [x] Connor: Connect Pi and find out IP address
 - [x] Connor: Get Chassis component
+
+
+###Review
