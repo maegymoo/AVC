@@ -5,27 +5,15 @@ ENGR101 Autonomous Vehicle Challenge
 
 | Week | Dates | Team  Objectives | Items Due | Conflicting Commitments | Tasks |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | 20th April | Get AVC plan & Robot moving in a straight line | AVC Plan | Phys122 Test | [Week 1 Tasklist] (#week-1-tasklist) |
-| 2 | 27th April | Plan on facebook for upcoming tasks | | Holidays | [Week 2 Tasklist] (#week-2-tasklist) |
-| 3 | 4th May | Complete Quadrant 1 | | COMP102 test | |
-| 4 | 11th May | Complete Quadrant 2 | | | |
-| 5 | 18th May | Complete Quadrant 3 | | ENGR121 test | |
-| 6 | 25th May | Complete Quadrant 4 | | ENGR101 test | |
-| 7 | 30th May | **Robot Due** | Robot | | |
-| 8 | 8th June | | | | |
-| 9 | 13th June | | Final AVC Project report | | |
-
-
-
-###Week 1 Tasklist
-- [ ] All: Complete AVC plan
-- [x] Fariha: Check Team Agreement
-- [x] Fariha: Set up plan
-- [x] Maegan: Set up GitHub Repository
-- [ ] Nicholas:
-- [ ] Henk:
-- [x] Connor: Connect Pi and find out IP address
-- [x] Connor: Get Chassis component
+| 1 | 20th April | Get AVC plan & Robot moving in a straight line | AVC Plan | Phys122 Test | [Tasklist & Review] (/WeeklyUpdate/Week 1) |
+| 2 | 27th April | Plan on facebook for upcoming tasks | | Holidays | [Tasklist & Review] (/WeeklyUpdate/Week 2) |
+| 3 | 4th May | Complete Quadrant 1 | | COMP102 test | [Tasklist & Review] (/WeeklyUpdate/Week 3) |
+| 4 | 11th May | Complete Quadrant 2 | | | [Tasklist & Review] (/WeeklyUpdate/Week 4) |
+| 5 | 18th May | Complete Quadrant 3 | | ENGR121 test | [Tasklist & Review] (/WeeklyUpdate/Week 5) |
+| 6 | 25th May | Complete Quadrant 4 | | ENGR101 test | [Tasklist & Review] (/WeeklyUpdate/Week 6) |
+| 7 | 30th May | **Robot Due** | Robot | | [Tasklist & Review] (/WeeklyUpdate/Week 7) |
+| 8 | 8th June | | | | [Tasklist & Review] (/WeeklyUpdate/Week 8) |
+| 9 | 13th June | | Final AVC Project report | | [Tasklist & Review] (/WeeklyUpdate/Week 9) |
 
 ###Weekly progress checklist for review
 
