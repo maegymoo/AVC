@@ -1,4 +1,4 @@
-# AVC
+# AVC 🎮💯
 ENGR101 Autonomous Vehicle Challenge
 
 ---
