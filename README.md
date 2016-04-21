@@ -3,6 +3,10 @@ ENGR101 Autonomous Vehicle Challenge
 
 ---
 
+
+[**Constants & other info**] (/WeeklyUpdate/Constants.md)
+
+
 | Week | Dates | Team  Objective(s) | Items Due | Conflicting Commitments | Tasks |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | 1 | 20th April | Complete AVC plan. Robot moving in a straight line. | **AVC Plan** (11:59pm 22/4) | Phys122 Test | [Tasklist & Review] (/WeeklyUpdate/Week 1.md) |
