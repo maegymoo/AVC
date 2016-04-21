@@ -3,17 +3,17 @@ ENGR101 Autonomous Vehicle Challenge
 
 ---
 
-| Week | Dates | Team  Objectives | Items Due | Conflicting Commitments | Tasks |
+| Week | Dates | Team  Objective(s) | Items Due | Conflicting Commitments | Tasks |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | 20th April | Get AVC plan & Robot moving in a straight line | AVC Plan | Phys122 Test | [Tasklist & Review] (/WeeklyUpdate/Week 1.md) |
+| 1 | 20th April | Complete AVC plan. Robot moving in a straight line. | **AVC Plan** (11:59pm 22/4) | Phys122 Test | [Tasklist & Review] (/WeeklyUpdate/Week 1.md) |
 | 2 | 27th April | Plan on facebook for upcoming tasks | | Holidays | [Tasklist & Review] (/WeeklyUpdate/Week 2.md) |
-| 3 | 4th May | Complete Quadrant 1 | | COMP102 test | [Tasklist & Review] (/WeeklyUpdate/Week 3.md) |
-| 4 | 11th May | Complete Quadrant 2 | | | [Tasklist & Review] (/WeeklyUpdate/Week 4.md) |
-| 5 | 18th May | Complete Quadrant 3 | | ENGR121 test | [Tasklist & Review] (/WeeklyUpdate/Week 5.md) |
-| 6 | 25th May | Complete Quadrant 4 | | ENGR101 test | [Tasklist & Review] (/WeeklyUpdate/Week 6.md) |
-| 7 | 30th May | **Robot Due** | Robot | | [Tasklist & Review] (/WeeklyUpdate/Week 7.md) |
-| 8 | 8th June | | | | [Tasklist & Review] (/WeeklyUpdate/Week 8.md) |
-| 9 | 13th June | | Final AVC Project report | | [Tasklist & Review] (/WeeklyUpdate/Week 9.md) |
+| 3 | 4th May | Complete Quadrant 1 | | | [Tasklist & Review] (/WeeklyUpdate/Week 3.md) |
+| 4 | 11th May | Complete Quadrant 2 | **AVC Progress Report** (12:00pm 16/5) | COMP102 Test (6:00pm 11/5)| [Tasklist & Review] (/WeeklyUpdate/Week 4.md) |
+| 5 | 18th May | Complete Quadrant 3 | | ENGR121 Test (10:00am 20/5) | [Tasklist & Review] (/WeeklyUpdate/Week 5.md) |
+| 6 | 25th May | Complete Quadrant 4 | | | [Tasklist & Review] (/WeeklyUpdate/Week 6.md) |
+| 7 | 30th May | Complete full course | **Robot** | ENGR101 Test (12:00pm 30/5) | [Tasklist & Review] (/WeeklyUpdate/Week 7.md) |
+| 8 | 8th June | Work on AVC Reports | | | [Tasklist & Review] (/WeeklyUpdate/Week 8.md) |
+| 9 | 13th June | Finish AVC Reports | **Final AVC Project report** (12:00pm 13/6) | ENGR121 Exam (14/6)| [Tasklist & Review] (/WeeklyUpdate/Week 9.md) |
 
 ###Weekly progress checklist for review
 
