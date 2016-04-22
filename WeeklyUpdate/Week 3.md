@@ -7,3 +7,5 @@
 - [ ] Henk: Work on movement code and line detection code. 
 
 ###Review
+
+We have set goals for next week ([Week 4 Tasklist](/WeeklyUpdates/Week 4.md))
