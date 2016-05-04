@@ -1,0 +1,45 @@
+#include<stdio.h>
+#include<time.h>
+
+extern "C" int InitHardware();
+extern "C" int ReadAnalog();
+extern "C" int Sleep(int sec, int usec);
+extern "C" SetMotor(int motor, int dir, int speed);
+extern "C" int take_picture();
+extern "C" int get_pixel(int row, int col, int colour);
+extern "C" int display_picture(int delay_sec, int delay_usec);
+
+int main(){
+
+    InitHardware();
+    take_picture();
+
+    /*declare_colour_variables*/
+
+    /*int r;
+    int g;
+    int b;
+    int brightness;
+
+    int i = 0;
+
+    int colours[ 319 ];
+    int weight[ 319 ];
+
+    for(i = 0; i < 320; i++){
+        r = get_pixel(120, i, 1);
+        g = get_pixel(120, i, 2);
+        b = get_pixel(120, i, 3);
+        brightness = (r + g + b)/3;
+        colours[ i ] = brightness;
+        weight[ i ] = i - 160;
+
+        SetMotor(1,1,200);
+        SetMotor(2,1,200);
+    }*/
+
+    take_picture();
+    display_picture(10, 0);
+    return 0;
+
+}
