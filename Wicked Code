@@ -29,10 +29,8 @@ extern "C" int connect_to_server( char server_addr[15],int port);
 extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 
-
-int v_left = 0;
-int v_right = 0;
-int speed = 127;
+int speed = 100;
+int turn_sharpness = 24;
 
 int main(){
 
@@ -103,9 +101,12 @@ float scan_line(int row){
         //Puts a brightness value between 1 and 0 into the brightness array.
         brightness[ i ] = brightness / 256;
 
-        //Puts appropriate weight value in 'i' position of weight array.
-        //159.5 is subtracted because this is half of 319, so the values will range from -159.5 to +159.5.
-        weight[ i ] = i - 159.5;
+        /*
+        Puts appropriate weight value in 'i' position of weight array.
+        159.5 is subtracted because which is half of 319, leaving values which range from -159.5 to +159.5.
+        These values are then divided by 159.5, leaving values which range from -1 to +1.
+        */
+        weight[ i ] = (i - 159.5) / 159.5;
 
     }
 
@@ -120,7 +121,7 @@ float scan_line(int row){
 
         //Adds the brightness of a pixel multiplied by it's weight to the sum.
         sum = sum + brightness[ j ] * weight[ j ];
-        
+
         //Adds one to the number of values taken so we can calculate the average later.
         number++;
 
@@ -152,7 +153,7 @@ float scan_many_lines(){
     This loop repeatedly uses the scan_line method,
     and calculates the average of each average value, creating a very accurate reading.
     */
-    for(int i = 0; i < 240; i = i + 40){
+    for(int i = 0; i < 240; i = i + 10){
         sum = sum + scan_line(i);
         number++;
     }
@@ -181,11 +182,10 @@ int make_decision(float line_position){
 
     if(line_position < 0){
         //turn to the left as indicated by the negative value.
-        set_motor(1, speed + line_position);
+        set_motor(1, speed + (line_position * turn_sharpness));
     }else{
         //turn to the left as indicated by the positive value.
-        set_motor(2, speed - line_position);
+        set_motor(2, speed - (line_position * turn_sharpness));
     }
 
 }
-
