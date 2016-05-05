@@ -4,31 +4,34 @@
 #include <time.h>
 #include <string.h>
 
-// sudo gcc -Wall
+//sudo gcc -Wall
+
+//initialization methods.
 extern "C" int init_hardware();
 extern "C" int init(int d_lev);
 
-//camera
+//camera methods.
 extern "C" int take_picture();
 extern "C" char get_pixel(int row, int col, int color);
-extern "C" void set_pixel(int col, int row, char red,char green,char blue);
+extern "C" void set_pixel(int col, int row, char red, char green, char blue);
 
-//motor
+//motor method.
 extern "C" int set_motor(int motor,int speed);
 
-//utility
+//utility methods.
 extern "C" int read_analog(int ch_adc);
 extern "C" int Sleep(int sec, int usec);
 extern "C" int select_IO(int chan, int direct);
-extern "C" int write_digital(int chan,char level);
+extern "C" int write_digital(int chan, char level);
 extern "C" int read_digital(int chan);
 extern "C" int set_PWM(int chan, int value);
 
-//server
-extern "C" int connect_to_server(char server_addr[15],int port);
+//server methods.
+extern "C" int connect_to_server(char server_addr[15], int port);
 extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 
+//constant variables.
 int speed = 100;
 int turn_sharpness = 24;
 
@@ -62,11 +65,20 @@ This method is designed to make decisions, based on values returned from the loc
 */
 void make_decision(){
 
-    //Use the find_average_brightness method to calculate the average brightness for use later.
-    float average_brightness = find_average_brightness();
-
     //Find the position of the line by using the locate_line method, this method uses average_brightness as a parameter.
-    float line_position = locate_line(float average_brightness);
+    float line_position = locate_line();
+
+    if(line_position < 0){
+
+        //turn to the left as indicated by the negative value.
+        set_motor(1, speed + (line_position * turn_sharpness));
+
+    }else{
+
+        //turn to the left as indicated by the positive value.
+        set_motor(2, speed - (line_position * turn_sharpness));
+
+    }
 
     /*
     The left motor should be in port 1, and the right motor in port 2.
@@ -77,14 +89,6 @@ void make_decision(){
     This means we decrease the speed of the left wheel on negative averages, and vice versa for positive.
     This gives the added benefit of slowing down for sharp corners.
     */
-
-    if(line_position < 0){
-        //turn to the left as indicated by the negative value.
-        set_motor(1, speed + (line_position * turn_sharpness));
-    }else{
-        //turn to the left as indicated by the positive value.
-        set_motor(2, speed - (line_position * turn_sharpness));
-    }
 
 }
 
@@ -107,7 +111,7 @@ float locate_line(float average_brightness){
         The scan_line method is called with the increment variable 'i' for the row,
         and the average_brightness variable so aid the method.
         */
-        sum = sum + scan_line(i, float average_brightness);
+        sum = sum + scan_line(i);
 
         number++;
     }
@@ -138,7 +142,6 @@ float scan_line(int row){
     float sum = 0;
     float number = 0;
     float average = 0;
-    int bright_pixels = 0;
 
     //Declares loop increment variables.
     int i = 0;
@@ -212,3 +215,5 @@ float scan_line(int row){
     */
 
 }
+
+
