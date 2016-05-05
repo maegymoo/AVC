@@ -25,7 +25,7 @@ extern "C" int read_digital(int chan);
 extern "C" int set_PWM(int chan, int value);
 
 //server
-extern "C" int connect_to_server( char server_addr[15],int port);
+extern "C" int connect_to_server(char server_addr[15],int port);
 extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 
@@ -42,10 +42,10 @@ int main(){
     while(true){
 
         /*
-        Use the scan_many_lines method to locate the line.
+        Use the locate_line method to locate the line.
         Then use the make_decision method to decide what to do.
         */
-        make_decision(scan_many_lines());
+        make_decision();
 
     }
 
@@ -55,6 +55,68 @@ int main(){
 
     return 0;
 
+}
+
+/*
+This method is designed to make decisions, based on values returned from the locate_line method.
+*/
+void make_decision(){
+
+    //Use the find_average_brightness method to calculate the average brightness for use later.
+    float average_brightness = find_average_brightness();
+
+    //Find the position of the line by using the locate_line method, this method uses average_brightness as a parameter.
+    float line_position = locate_line(float average_brightness);
+
+    /*
+    The left motor should be in port 1, and the right motor in port 2.
+
+    A negative average indicates the robot has to turn left,
+    a positive average indicate the robot has to turn right.
+
+    This means we decrease the speed of the left wheel on negative averages, and vice versa for positive.
+    This gives the added benefit of slowing down for sharp corners.
+    */
+
+    if(line_position < 0){
+        //turn to the left as indicated by the negative value.
+        set_motor(1, speed + (line_position * turn_sharpness));
+    }else{
+        //turn to the left as indicated by the positive value.
+        set_motor(2, speed - (line_position * turn_sharpness));
+    }
+
+}
+
+/*
+This method calls the scan_line method multiple times for different rows in order to give a more accurate result.
+*/
+float locate_line(float average_brightness){
+
+    //declare variables for calculating average.
+    int number = 0;
+    float sum = 0;
+
+    /*
+    This loop repeatedly uses the scan_line method,
+    and calculates the average of each average value, creating a very accurate reading.
+    */
+    for(int i = 0; i < 240; i = i + 10){
+
+        /*
+        The scan_line method is called with the increment variable 'i' for the row,
+        and the average_brightness variable so aid the method.
+        */
+        sum = sum + scan_line(i, float average_brightness);
+
+        number++;
+    }
+
+    //calculates average given to the sum of each scan_line and the number taken.
+    float average = sum / number;
+
+    //returns the average value so it can be used to make a decision.
+    return average;
 }
 
 /*
@@ -76,6 +138,7 @@ float scan_line(int row){
     float sum = 0;
     float number = 0;
     float average = 0;
+    int bright_pixels = 0;
 
     //Declares loop increment variables.
     int i = 0;
@@ -96,10 +159,20 @@ float scan_line(int row){
         r = get_pixel(row, i, 1);
         g = get_pixel(row, i, 2);
         b = get_pixel(row, i, 3);
-        brightness = (r + g + b)/3;
+        brightness = (r + g + b) / 3;
 
-        //Puts a brightness value between 1 and 0 into the brightness array.
-        brightness[ i ] = brightness / 256;
+        //Puts a brightness value of 1 or 0 into the brightness array, based on whether the pixel is more or less bright than the average.
+        if(brightness > 127){
+
+            //Set value at position 'i' to 1 (meaning that it's bright).
+            brightness[ i ] = 1;
+
+        }else{
+
+            //Set value at position 'i' to 0 (meaning that it's not bright).
+            brightness[ i ] = 0;
+
+        }
 
         /*
         Puts appropriate weight value in 'i' position of weight array.
@@ -119,7 +192,7 @@ float scan_line(int row){
     */
     for(j = 0; j < 320; j++){
 
-        //Adds the brightness of a pixel multiplied by it's weight to the sum.
+        //Adds a pixels weight to a sum if the loop before said it was a bright one.
         sum = sum + brightness[ j ] * weight[ j ];
 
         //Adds one to the number of values taken so we can calculate the average later.
@@ -130,62 +203,12 @@ float scan_line(int row){
     //Calculates the average of the weighted brightness values.
     average = sum / number;
 
-    /*
-    The 'average' is an average taken of values ranging from -159.5 to +159.5,
-    so the 'average' must also be in this range.
-    */
-
+    //Returns the average for the locate_line method.
     return average;
 
-}
-
-/*
-This method calls the scan_line method multiple times for different rows in order to give a more accurate result.
-*/
-
-float scan_many_lines(){
-
-    //declare variables for calculating average.
-    int number = 0;
-    float sum = 0;
-
     /*
-    This loop repeatedly uses the scan_line method,
-    and calculates the average of each average value, creating a very accurate reading.
+    The average is taken from values ranging from -1 to +1,
+    so the average must also be in this range.
     */
-    for(int i = 0; i < 240; i = i + 10){
-        sum = sum + scan_line(i);
-        number++;
-    }
-
-    //calculates average given to the sum of each scan_line and the number taken.
-    float average = sum / number;
-
-    //returns the average value so it can be used to make a decision.
-    return average;
-}
-
-/*
-This method is designed to make decisions based on values returned from the scan_many_lines method.
-*/
-int make_decision(float line_position){
-
-    /*
-    The left motor should be in port 1, and the right motor in port 2.
-
-    A negative average indicates the robot has to turn left,
-    a positive average indicate the robot has to turn right.
-
-    This means we decrease the speed of the left wheel on negative averages, and vice versa for positive.
-    This gives the added benefit of slowing down for sharp corners.
-    */
-
-    if(line_position < 0){
-        //turn to the left as indicated by the negative value.
-        set_motor(1, speed + (line_position * turn_sharpness));
-    }else{
-        //turn to the left as indicated by the positive value.
-        set_motor(2, speed - (line_position * turn_sharpness));
-    }
 
 }
