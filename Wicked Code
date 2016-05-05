@@ -1,0 +1,194 @@
+#include <stdio.h>
+
+#include <pthread.h>
+#include <time.h>
+#include <string.h>
+
+// sudo gcc -Wall
+extern "C" int init_hardware();
+extern "C" int init(int d_lev);
+
+//camera
+extern "C" int take_picture();
+extern "C" char get_pixel(int row, int col, int color);
+extern "C" void set_pixel(int col, int row, char red,char green,char blue);
+
+//motor
+extern "C" int set_motor(int motor,int speed);
+
+//utility
+extern "C" int read_analog(int ch_adc);
+extern "C" int Sleep(int sec, int usec);
+extern "C" int select_IO(int chan, int direct);
+extern "C" int write_digital(int chan,char level);
+extern "C" int read_digital(int chan);
+extern "C" int set_PWM(int chan, int value);
+
+//server
+extern "C" int connect_to_server( char server_addr[15],int port);
+extern "C" int send_to_server(char message[24]);
+extern "C" int receive_from_server(char message[24]);
+
+
+int v_left = 0;
+int v_right = 0;
+int speed = 127;
+
+int main(){
+
+    //initialize.
+    init_hardware();
+    init(0);
+
+    //declare variables.
+    float line80_position;
+    float line160_position;
+
+    //while 'true' loop makes the robot repeat what it's doing, could put a condition which tells the robots it's finished in here.
+    while(true){
+
+        //use the find_line method below to locate the line.
+        line80_position = find_line(80);
+
+        make_decision(line80_position);
+
+    }
+    //stop robot once done.
+    set_motor(1, 0);
+    set_motor(2, 0);
+
+    return 0;
+
+}
+
+float find_line(int row){
+
+    //declare arrays.
+    int brightness[ 319 ];
+    int weight[ 319 ];
+
+    //declare color variables.
+    int r;
+    int g;
+    int b;
+    int brightness;
+
+    //declares variables to for use in the second loop.
+    float sum = 0;
+    float number = 0;
+    float average = 0;
+
+    //Declares loop variables.
+    int i = 0;
+    int j = 0;
+
+    //Takes a picture and stores in memory.
+    take_picture();
+
+    /*
+    This loop takes information about the picture and creates two arrays.
+
+    The brightness array is given a 1 or 0 value for each pixel based on whether the robot thinks it's looking at line or not.
+    The weight array simply has numbers ranging from -160 to +159 for each pixel.
+    */
+
+
+    for(i = 0; i < 320; i++){
+
+        //Find the brightness of a pixel in appropriate row.
+        r = get_pixel(row, i, 1);
+        g = get_pixel(row, i, 2);
+        b = get_pixel(row, i, 3);
+        brightness = (r + g + b)/3;
+
+        //Puts brightness value of 1 or 0 into position 'i' of brightness array.
+        if(brightness > 127){
+            brightness[ i ] = 1;
+        }else{
+            brightness[ i ] = 0;
+        }
+
+        //Puts appropriate weight value in 'i' position of weight array.
+        weight[ i ] = i - 160;
+
+    }
+
+    /*
+    This loop sums the weights of the bright pixels,
+    then finds an average by dividing by the number of bright pixels.
+
+    A negative average indicates the robot has to turn left,
+    a positive average indicate the robot has to turn right.
+    */
+    for(j = 0; j < 320; j++){
+
+        /*
+        This if statement checks if the pixel is bright,
+        then adds its weight to the sum and increments the number so we can work out an average later.
+        */
+        if(brightness[ j ] = 1){
+            sum = sum + weight[ j ];
+            number++;
+        }
+
+    }
+
+    //returns the value 256 if there isn't enough bright pixels to indicate there even is a line.
+    if(number < 10){
+        return 256;
+    }
+
+    //returns the value 257 if there is so many bright pixels that the robot has reached an intersection.
+    if(number > 100){
+        return 257;
+    }
+
+    //works out mean of weighted values by dividing the sum of weights by the number of bright pixels.
+    average = sum / number;
+
+    /*
+    The average is an average of values ranging from -160 to +159, so the average must also be in this range.
+
+    The left motor should be in port 1, and the right motor in port 2.
+
+    A negative average indicates the robot has to turn left,
+    a positive average indicate the robot has to turn right.
+
+    This means we decrease the speed of the left wheel on negative averages, and vice versa for positive.
+    This gives the added benefit of slowing down for sharp corners.
+    */
+
+    return average;
+
+}
+
+/*
+This method is designed to make decisions based on
+*/
+make_decision(float line_position){
+    if(line_position = 256){
+        /*
+        If there isn't a line in front of the robot as indicated by the value of 256,
+        simply turn to the left slightly and check again.
+        */
+        set_motor(1, 20);
+        set_motor(2, -20);
+        Sleep(1,0);
+    }else if(line_position = 257){
+        /*
+        If the robot reaches an intersection as indicated by the value of 257,
+        check further ahead to see if the line continues.
+        */
+        line160_position = find_line(160);
+
+        //call method to navigate the intersection, this method is very similar to .
+        make_decision(line160_position);
+
+    }else if(line_position < 0){
+        //turn to the left as indicated by the negative value.
+        set_motor(1, speed + line_position);
+    }else{
+        //turn to the left as indicated by the positive value.
+        set_motor(2, speed - line_position);
+    }
+}
