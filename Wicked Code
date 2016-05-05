@@ -46,9 +46,9 @@ int main(){
 
         /*
         Use the locate_line method to locate the line.
-        Then use the make_decision method to decide what to do.
+        Then use the follow_line method to decide what to do.
         */
-        make_decision();
+        follow_line();
 
     }
 
@@ -63,7 +63,7 @@ int main(){
 /*
 This method is designed to make decisions, based on values returned from the locate_line method.
 */
-void make_decision(){
+void follow_line(){
 
     //Find the position of the line by using the locate_line method, this method uses average_brightness as a parameter.
     float line_position = locate_line();
