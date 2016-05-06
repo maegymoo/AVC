@@ -38,7 +38,7 @@ int turn_sharpness = 24;
 //Function declarations.
 float locate_line();
 
-int main(){
+void main(){
 
     //Initialize.
     init_hardware();
@@ -55,7 +55,7 @@ int main(){
         Use the locate_line method to locate the line.
         Then use the follow_line method to decide what to do.
         */
-        float proportional_error = locate_line(); //Find the proportional error of the line by using the locate_line method, this method uses average_brightness as a parameter.
+        int proportional_error = (int)locate_line(); //Find the proportional error of the line by using the locate_line method, this method uses average_brightness as a parameter.
 
         if(proportional_error < 0){
 
@@ -82,8 +82,6 @@ int main(){
     //Stop robot once done.
     set_motor(1, 0);
     set_motor(2, 0);
-
-    return 0;
 
 }
 
