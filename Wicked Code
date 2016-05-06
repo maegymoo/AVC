@@ -6,19 +6,19 @@
 
 //sudo gcc -Wall
 
-//initialization methods.
+//Initialization methods.
 extern "C" int init_hardware();
 extern "C" int init(int d_lev);
 
-//camera methods.
+//Camera methods.
 extern "C" int take_picture();
 extern "C" char get_pixel(int row, int col, int color);
 extern "C" void set_pixel(int col, int row, char red, char green, char blue);
 
-//motor method.
+//Motor method.
 extern "C" int set_motor(int motor,int speed);
 
-//utility methods.
+//Utility methods.
 extern "C" int read_analog(int ch_adc);
 extern "C" int Sleep(int sec, int usec);
 extern "C" int select_IO(int chan, int direct);
@@ -26,20 +26,27 @@ extern "C" int write_digital(int chan, char level);
 extern "C" int read_digital(int chan);
 extern "C" int set_PWM(int chan, int value);
 
-//server methods.
+//Server methods.
 extern "C" int connect_to_server(char server_addr[15], int port);
 extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 
-//constant variables.
+//Constant variables.
 int speed = 100;
 int turn_sharpness = 24;
 
+//Function declarations.
+float locate_line();
+
 int main(){
 
-    //initialize.
+    //Initialize.
     init_hardware();
     init(0);
+
+    //Set speed to zero at start.
+    set_motor(1, 0);
+    set_motor(2, 0);
 
     //while 'true' loop makes the robot repeat what it's doing, could put a condition which tells the robots it's finished in here.
     while(true){
@@ -48,11 +55,31 @@ int main(){
         Use the locate_line method to locate the line.
         Then use the follow_line method to decide what to do.
         */
-        follow_line();
+        float proportional_error = locate_line(); //Find the proportional error of the line by using the locate_line method, this method uses average_brightness as a parameter.
+
+        if(proportional_error < 0){
+
+            set_motor(1, speed + (proportional_error * turn_sharpness)); //Turn to the left as indicated by the negative value.
+
+        }else{
+
+            set_motor(2, speed - (proportional_error * turn_sharpness)); //Turn to the left as indicated by the positive value.
+
+        }
+
+        /*
+        The left motor should be in port 1, and the right motor in port 2.
+
+        A negative average indicates the robot has to turn left,
+        a positive average indicate the robot has to turn right.
+
+        This means we decrease the speed of the left wheel on negative averages, and vice versa for positive.
+        This gives the added benefit of slowing down for sharp corners.
+        */
 
     }
 
-    //stop robot once done.
+    //Stop robot once done.
     set_motor(1, 0);
     set_motor(2, 0);
 
@@ -61,78 +88,18 @@ int main(){
 }
 
 /*
-This method is designed to make decisions, based on values returned from the locate_line method.
-*/
-void follow_line(){
-
-    //Find the position of the line by using the locate_line method, this method uses average_brightness as a parameter.
-    float line_position = locate_line();
-
-    if(line_position < 0){
-
-        //turn to the left as indicated by the negative value.
-        set_motor(1, speed + (line_position * turn_sharpness));
-
-    }else{
-
-        //turn to the left as indicated by the positive value.
-        set_motor(2, speed - (line_position * turn_sharpness));
-
-    }
-
-    /*
-    The left motor should be in port 1, and the right motor in port 2.
-
-    A negative average indicates the robot has to turn left,
-    a positive average indicate the robot has to turn right.
-
-    This means we decrease the speed of the left wheel on negative averages, and vice versa for positive.
-    This gives the added benefit of slowing down for sharp corners.
-    */
-
-}
-
-/*
-This method calls the scan_line method multiple times for different rows in order to give a more accurate result.
-*/
-float locate_line(float average_brightness){
-
-    //declare variables for calculating average.
-    int number = 0;
-    float sum = 0;
-
-    /*
-    This loop repeatedly uses the scan_line method,
-    and calculates the average of each average value, creating a very accurate reading.
-    */
-    for(int i = 0; i < 240; i = i + 10){
-
-        /*
-        The scan_line method is called with the increment variable 'i' for the row,
-        and the average_brightness variable so aid the method.
-        */
-        sum = sum + scan_line(i);
-
-        number++;
-    }
-
-    //calculates average given to the sum of each scan_line and the number taken.
-    float average = sum / number;
-
-    //returns the average value so it can be used to make a decision.
-    return average;
-}
-
-/*
 This method takes a picture, and uses the brightness of each of the pixels to determine where the line is.
+The error will be returned in the range -1 to +1.
 */
-float scan_line(int row){
+float locate_line(){
 
-    //declare arrays.
-    float brightness[ 319 ];
+    int row = 160;
+
+    //Declare arrays.
+    float brightness_list[ 319 ];
     float weight[ 319 ];
 
-    //declare color variables for use in the first loop.
+    //Declare color variables for use in the first loop.
     int r;
     int g;
     int b;
@@ -147,8 +114,7 @@ float scan_line(int row){
     int i = 0;
     int j = 0;
 
-    //Takes a picture and stores in memory.
-    take_picture();
+    take_picture(); //Takes a picture and stores in memory.
 
     /*
     This loop takes information about the picture and creates two arrays.
@@ -167,13 +133,11 @@ float scan_line(int row){
         //Puts a brightness value of 1 or 0 into the brightness array, based on whether the pixel is more or less bright than the average.
         if(brightness > 127){
 
-            //Set value at position 'i' to 1 (meaning that it's bright).
-            brightness[ i ] = 1;
+            brightness_list[ i ] = 1; //Set value at position 'i' to 1 (meaning that it's bright).
 
         }else{
 
-            //Set value at position 'i' to 0 (meaning that it's not bright).
-            brightness[ i ] = 0;
+            brightness_list[ i ] = 0; //Set value at position 'i' to 0 (meaning that it's not bright).
 
         }
 
@@ -195,19 +159,13 @@ float scan_line(int row){
     */
     for(j = 0; j < 320; j++){
 
-        //Adds a pixels weight to a sum if the loop before said it was a bright one.
-        sum = sum + brightness[ j ] * weight[ j ];
-
-        //Adds one to the number of values taken so we can calculate the average later.
-        number++;
+        sum = sum + brightness_list[ j ] * weight[ j ]; //Adds a pixels weight to a sum if the loop before said it was a bright one.
+        number++; //Adds one to the number of values taken so we can calculate the average later.
 
     }
 
-    //Calculates the average of the weighted brightness values.
-    average = sum / number;
-
-    //Returns the average for the locate_line method.
-    return average;
+    average = sum / number; //Calculates the average of the weighted brightness values.
+    return average; //Returns the average for the locate_line method.
 
     /*
     The average is taken from values ranging from -1 to +1,
@@ -215,5 +173,3 @@ float scan_line(int row){
     */
 
 }
-
-
