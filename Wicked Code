@@ -55,7 +55,7 @@ void main(){
         Use the locate_line method to locate the line.
         Then use the follow_line method to decide what to do.
         */
-        int proportional_error = (int)locate_line(); //Find the proportional error of the line by using the locate_line method, this method uses average_brightness as a parameter.
+        float proportional_error = locate_line(); //Find the proportional error of the line by using the locate_line method, this method uses average_brightness as a parameter.
 
         if(proportional_error < 0){
 
