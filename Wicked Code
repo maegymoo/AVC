@@ -32,21 +32,22 @@ extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 
 //Constant variables.
-int speed = 100;
-int turn_sharpness = 24;
+int speed = 40;
+int turn_sharpness = 100;
 
 //Function declarations.
 float locate_line();
 
-void main(){
+int main(){
 
     //Initialize.
     init_hardware();
-    init(0);
 
     //Set speed to zero at start.
     set_motor(1, 0);
     set_motor(2, 0);
+
+    float proportional_error;
 
     //while 'true' loop makes the robot repeat what it's doing, could put a condition which tells the robots it's finished in here.
     while(true){
@@ -55,17 +56,15 @@ void main(){
         Use the locate_line method to locate the line.
         Then use the follow_line method to decide what to do.
         */
-        float proportional_error = locate_line(); //Find the proportional error of the line by using the locate_line method, this method uses average_brightness as a parameter.
+        proportional_error = locate_line(); //Find the proportional error of the line by using the locate_line method.
 
-        if(proportional_error < 0){
-
-            set_motor(1, speed + (proportional_error * turn_sharpness)); //Turn to the left as indicated by the negative value.
-
-        }else{
-
-            set_motor(2, speed - (proportional_error * turn_sharpness)); //Turn to the left as indicated by the positive value.
-
+        if (proportional_error > 1 || proportional_error < -1){
+            return 0;
         }
+
+        //Turn the robot.
+        set_motor(1, speed - (proportional_error * turn_sharpness));
+        set_motor(2, speed + (proportional_error * turn_sharpness));
 
         /*
         The left motor should be in port 1, and the right motor in port 2.
@@ -83,6 +82,8 @@ void main(){
     set_motor(1, 0);
     set_motor(2, 0);
 
+    return 0;
+
 }
 
 /*
@@ -98,9 +99,9 @@ float locate_line(){
     float weight[ 319 ];
 
     //Declare color variables for use in the first loop.
-    int r;
-    int g;
-    int b;
+    char r;
+    char g;
+    char b;
     float brightness;
 
     //declare maths variables for use in the second loop.
@@ -120,7 +121,7 @@ float locate_line(){
     The brightness array is given a 1 or 0 value for each pixel based on whether the robot thinks it's looking at line or not.
     The weight array simply has numbers ranging from -159.5 to +159.5 for each pixel.
     */
-    for(i = 0; i < 320; i++){
+    for(i = 1; i < 321; i++){
 
         //Find the brightness of a pixel in appropriate row.
         r = get_pixel(row, i, 1);
@@ -144,7 +145,7 @@ float locate_line(){
         159.5 is subtracted because which is half of 319, leaving values which range from -159.5 to +159.5.
         These values are then divided by 159.5, leaving values which range from -1 to +1.
         */
-        weight[ i ] = (i - 159.5) / 159.5;
+        weight[ i ] = (i - 160) /160;
 
     }
 
