@@ -89,18 +89,18 @@ int main(){
 }
 
 /*
-This method takes a picture, and uses the brightness of each of the pixels to determine where the line is.
+This method takes a picture, and uses the luminosity of each of the pixels to determine where the line is.
 The error will be returned in the range -1 to +1.
 */
 float locate_line(int row){
 
     //Declare color variables for use in the first loop.
-    char brightness;
+    char luminosity;
 
     //declare maths variables for use later.
-    float sum = 0;
+    float weight_sum = 0;
     float number = 0;
-    float average = 0;
+    float weight_average = 0;
 
     take_picture(); //Takes a picture and stores in memory.
 
@@ -113,8 +113,8 @@ float locate_line(int row){
     */
     for(int i = 0; i < 320; i++){
 
-        //Find the brightness of a pixel in appropriate row.
-        brightness = get_pixel(row, i + 1, 3);
+        //Find the luminosity of a pixel in appropriate row.
+        luminosity = get_pixel(row, i + 1, 3);
 
         /*
         Sets appropriate weight value.
@@ -124,18 +124,18 @@ float locate_line(int row){
         */
         weight = (i/159.5) - 1;
 
-        //Adds the pixels weight to the sum if the pixel is bright enough.
-        if(brightness > 127){
+        //Adds the pixels weight to the weight_sum if the pixel is bright enough.
+        if(luminosity > 127){
 
-            sum = sum + weight;
+            weight_sum = weight_sum + weight;
             number++;
 
         }
 
     }
 
-    average = sum / number; //Calculates the average of the weighted brightness values.
-    return average; //Returns the average for the locate_line method.
+    weight_average = weight_sum / number; //Calculates the average of the weighted luminosity values.
+    return weight_average; //Returns the average for the locate_line method.
 
     /*
     The average is taken from values ranging from -1 to +1,
