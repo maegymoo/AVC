@@ -137,10 +137,11 @@ float locate_line(){
 
         /*
         Puts appropriate weight value in 'i' position of weight array.
-        159.5 is subtracted because which is half of 319, leaving values which range from -159.5 to +159.5.
-        These values are then divided by 159.5, leaving values which range from -1 to +1.
+        The range starts at 0 - 319.
+        159.5 is divided leaving a range of 0 - 2.
+        Then this range is subtracted by 1, leaving a useful range of +1 to -1.
         */
-        weight[ i ] = (i - 160) /160;
+        weight[ i ] = (i/159.5) - 1;
 
     }
 
