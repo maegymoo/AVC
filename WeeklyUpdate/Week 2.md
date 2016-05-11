@@ -1,5 +1,5 @@
 ###Week 2 Tasklist
-- [ ] All: Write background section of reports. Agree on and finalise chassis design. Update GITHUB with any new information.
+- [x] All: Write background section of reports. Agree on and finalise chassis design. Update GITHUB with any new information.
 
 
 ####Week 2 Review
