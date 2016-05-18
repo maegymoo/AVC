@@ -33,7 +33,7 @@ extern "C" int receive_from_server(char message[24]);
 
 //Constant variables.
 int speed = 50;
-int turn_sharpness = 30;
+int turn_sharpness = 50;
 char luminosity_threshold = 127;
 
 //Function declarations.
@@ -52,16 +52,23 @@ int main(){
 
         proportional_error = locate_line(); //Find the proportional error of the line by using the locate_line method. Parameter is the row of the image to use.
 
-        printf("Current ERROR is:%d\n", proportional_error);
+        printf("Error: %f\n", proportional_error);
 
-        //Make sure the locate line method is returning a legitimate value, the value should be between +1 and -1.
-        if (proportional_error > 1 || proportional_error < -1){
-            printf("Exception - Locate line function failed.");
-            return 0;
+        if (proportional_error == 2){
+            set_motor(1, -50);
+            set_motor(2, -50);
+        }else{
+
+        if (proportional_error > 0){
+            proportional_error = proportional_error*proportional_error;
+        }else{
+            proportional_error = 0 - (proportional_error*proportional_error);
         }
 
         set_motor(1, speed - (proportional_error * turn_sharpness));
         set_motor(2, speed + (proportional_error * turn_sharpness));
+        }
+
         /*
         The left motor should be in port 1, and the right motor in port 2.
 
@@ -115,6 +122,10 @@ float locate_line(){
 
         }
 
+    }
+
+    if(number < 5){
+        return 2;
     }
 
     weight_average = weight_sum / number; //Calculates the average of the weighted luminosity values.
