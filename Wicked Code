@@ -40,6 +40,7 @@ char luminosity_threshold = 127;
 float locate_line();
 
 void open_gate();
+void adjust_direction();
 
 int main(){
 
@@ -56,27 +57,7 @@ int main(){
 
         printf("Error: %f\n", proportional_error);
 
-        if (proportional_error == 2){
-            set_motor(1, -50);
-            set_motor(2, -50);
-        }else{
-
-        if (proportional_error > 0){
-            proportional_error = proportional_error*proportional_error;
-        }else{
-            proportional_error = 0 - (proportional_error*proportional_error);
-        }
-
-        set_motor(1, speed - (proportional_error * turn_sharpness));
-        set_motor(2, speed + (proportional_error * turn_sharpness));
-        }
-
-        /*
-        The left motor should be in port 1, and the right motor in port 2.
-
-        A negative error indicates the robot has to turn left.
-        A positive error indicates the robot has to turn right.
-        */
+        adjust_direction(proportional_error);
 
     }
 
@@ -132,6 +113,32 @@ float locate_line(){
 
     weight_average = weight_sum / number; //Calculates the average of the weighted luminosity values.
     return weight_average; //Returns the average for the locate_line method.
+
+}
+
+void adjust_direction(float error){
+
+    if (error == 2){
+            set_motor(1, -50);
+            set_motor(2, -50);
+    }else{
+
+        if (error > 0){
+            error = error*error;
+        }else{
+            error = 0 - (error*error);
+        }
+
+        set_motor(1, speed - (error * turn_sharpness));
+        set_motor(2, speed + (error * turn_sharpness));
+    }
+
+    /*
+    The left motor should be in port 1, and the right motor in port 2.
+
+    A negative error indicates the robot has to turn left.
+    A positive error indicates the robot has to turn right.
+    */
 
 }
 
