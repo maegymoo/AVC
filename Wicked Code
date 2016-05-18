@@ -39,6 +39,8 @@ char luminosity_threshold = 127;
 //Function declarations.
 float locate_line();
 
+void open_gate();
+
 int main(){
 
     init(0);
@@ -131,4 +133,25 @@ float locate_line(){
     weight_average = weight_sum / number; //Calculates the average of the weighted luminosity values.
     return weight_average; //Returns the average for the locate_line method.
 
+}
+
+void open_gate(){
+    char server_addr[15];
+    //stores as a string
+    sprintf(server_addr,"130.195.6.196");
+    //connects to server with ip address 130.195.6.196
+    connect_to_server(server_addr, 1024);
+    char server_msg[24];
+    //stores string
+    sprintf(server_msg,"Please");
+    //sends server_msg to server
+    send_to_server(server_msg);
+    char pw[6];
+    //receives gate pw from server
+    receive_from_server(pw);
+    //prints the password
+    printf("pswd=%s\n",pw);
+    //sends pw back to server
+    send_to_server(pw);
+    //and voila gate opens!!
 }
