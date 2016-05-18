@@ -1,4 +1,4 @@
-RaspberryPi IP Address: 10.140.75.59 (Check)
+RaspberryPi IP Address: 10.140.67.244
 
 RaspberryPi Password: pi
 
