@@ -1,0 +1,53 @@
+# include <stdio.h>
+# include <time.h>
+# include <string.h>
+# include <pthread.h>
+
+extern "C" int init(int d_lev);
+extern "C" int connect_to_server(char server_addr[15],int port);
+extern "C" int send_to_server(char message[24]);
+extern "C" int receive_from_server(char message[24]);
+extern "C" int read_analog(int ch_adc);
+extern "C" int Sleep(int sec, int usec);
+extern "C" int set_motor(int motor, int speed);
+
+int main (){
+    init(0);
+    int front_reading;
+    int right_reading;
+        front_reading = read_analog(0);
+        right_reading = read_analog(1);
+
+while(true){
+        front_reading = read_analog(0);
+        right_reading = read_analog(1);
+
+        printf("front reading: %d\n", front_reading);
+        printf("right reading: %d\n", right_reading);
+        int base_speed = (120-(front_reading/5));
+        printf("base speed: %d\n", base_speed);
+        Sleep(0,50000);
+
+        if(right_reading>100&&front_reading<100){
+                set_motor(1,base_speed);
+                set_motor(2,base_speed);
+            }
+        else if(right_reading>100&&front_reading>100){
+                set_motor(1, -1*base_speed);
+                set_motor(2, base_speed);
+                Sleep(0,50000);
+            }
+
+        else if(right_reading<100){
+            set_motor(1, base_speed);
+            set_motor(2, -1*base_speed);
+            Sleep(0,50000);
+        }
+
+
+
+}
+
+set_motor(1, 0);
+set_motor(2, 0);
+return 0;}
