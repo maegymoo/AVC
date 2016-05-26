@@ -24,8 +24,8 @@ extern "C" int connect_to_server(char server_addr[15], int port);
 extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 //Constant variables.
-int speed = 70;
-int turn_sharpness = 50;
+int speed = 40;
+int turn_sharpness = 40;
 char luminosity_threshold = 127;
 bool throughGate = false;
 int openGate();
@@ -34,53 +34,53 @@ bool seeLine = true;
 int frontReading = 0;
 int backCount = 0;
 int row = 160;
-int main(){
+int main()
+{
     init(0);
     set_motor(1, 0);
     set_motor(2, 0);
     float proportional_error;
-    while(true){
-        proportional_error = locate_line(); //Find the proportional error of the line by using the locate_line method. Parameter is the row of the image to use.
+    float error;
+    while(true)
+    {
+
+
+        error = locate_line(); //Find the proportional error of the line by using the locate_line method. Parameter is the row of the image to use.
         //Make sure the locate line method is returning a legitimate value, the value should be between +1 and -1.
-        if (proportional_error > 1 || proportional_error < -1){
+        if (proportional_error > 1 || proportional_error < -1)
+        {
             printf("Exception - Locate line function failed.");
             return 0;
         }
         //if (proportional_error > 0.8 || proportional_error < -0.8){}
         //proportional_error = proportional_error*proportional_error;
-	
-	if (proportional_error != 0 || seeLine == true) {
-        set_motor(1, speed - (proportional_error * turn_sharpness));
-	set_motor(2, speed + (proportional_error * turn_sharpness));
-	}
-	else if (proportional_error == 0) {
-		if (seeLine == false) {
-			set_motor(1,-speed);
-			set_motor(2,-speed);
-			//while ((get_pixel(10,row,3) <= luminosity_threshold) && (get_pixel(310,row,3) <= luminosity_threshold)) {
-				//backCount++;
-			
-			//if (backCount >= 2) {
-				//printf("%d\n",backCount);
-				//backCount = 0;
-				//printf("%d\n",backCount);
-				//set_motor(1,0);
-				//set_motor(2,0);
-				//Sleep(1,0000);
-			//}
-			//}
-		}
-	}
-	/*
-        The left motor should be in port 1, and the right motor in port 2.
-        A negative error indicates the robot has to turn left.
-        A positive error indicates the robot has to turn right.
-        */
-	//frontReading = read_analog(0);
-	//if (frontReading > 350 && throughGate == false) {
-		//do something
-	//	throughGate = true;
-	//}
+
+        if (seeLine)
+        {
+            proportional_error = error;
+            set_motor(1, speed - (proportional_error * turn_sharpness));
+            set_motor(2, speed + (proportional_error * turn_sharpness));
+
+
+        }
+        else
+        {
+            if(proportional_error > 0)
+            {
+                set_motor(1,-50);
+                set_motor(2,50);
+            }
+            else
+            {
+                set_motor(1,50);
+                set_motor(2,-50);
+
+        }
+        /*
+            The left motor should be in port 1, and the right motor in port 2.
+            A negative error indicates the robot has to turn left.
+            A positive error indicates the robot has to turn right.
+            */
     }
     set_motor(1, 0);
     set_motor(2, 0);
@@ -90,8 +90,8 @@ int main(){
 This method takes a picture, and uses the luminosity of each of the pixels to determine where the line is.
 The error will be returned in the range -1 to +1.
 */
-float locate_line(){
-    int row = 160;
+float locate_line()
+{
     char luminosity;
     float weight = 0;
     float weight_sum = 0;
@@ -104,41 +104,46 @@ float locate_line(){
     A negative average indicates the robot has to turn left,
     a positive average indicate the robot has to turn right.
     */
-    for(int i = 0; i < 320; i++){
+    for(int i = 0; i < 320; i++)
+    {
         luminosity = get_pixel(i, row, 3); //Gets luminosity of pixel from desired row, and from columns 1 to 320.
         weight = (i/159.5) - 1; //Sets appropriate weight value. Equation is set up to range from -1 to +1.
-        if(luminosity > luminosity_threshold){
+        if(luminosity > luminosity_threshold)
+        {
             weight_sum = weight_sum + weight; //Adds the pixels weight to the weight_sum if the pixel is bright enough.
             number++; //Increments number of bright pixels so we can calculate the average later.
         }
     }
     weight_average = weight_sum / number; //Calculates the average of the weighted luminosity values.
-    if (number <= 1) {
-    	seeLine = false;
-    	return 0;
+    if (number <= 2)
+    {
+        seeLine = false;
+        return 0;
     }
     seeLine = true;
     return weight_average; //Returns the average for the locate_line method.
 }
-int openGate() {
-	char server_addr[15];
-	//stores as a string
-    	sprintf(server_addr,"130.195.6.196");
-    	//connects to server with ip address 130.195.6.196
-    	connect_to_server(server_addr, 1024);
-    	char server_msg[24];
-    	//stores string
-    	sprintf(server_msg,"Please");
-    	//sends server_msg to server
-    	send_to_server(server_msg);
-    	char pw[6];
-    	//receives gate pw from server
-    	receive_from_server(pw);
-    	//prints the password
-    	printf("pswd=%s\n",pw);
-    	//sends pw back to server
-    	send_to_server(pw);
-    	//and voila gate opens!! 
-	throughGate = true;
-	//tells the pi that we're through the gate, so it doesn't try to open it again later
-	return 0;}
+int openGate()
+{
+    char server_addr[15];
+    //stores as a string
+    sprintf(server_addr,"130.195.6.196");
+    //connects to server with ip address 130.195.6.196
+    connect_to_server(server_addr, 1024);
+    char server_msg[24];
+    //stores string
+    sprintf(server_msg,"Please");
+    //sends server_msg to server
+    send_to_server(server_msg);
+    char pw[6];
+    //receives gate pw from server
+    receive_from_server(pw);
+    //prints the password
+    printf("pswd=%s\n",pw);
+    //sends pw back to server
+    send_to_server(pw);
+    //and voila gate opens!!
+    throughGate = true;
+    //tells the pi that we're through the gate, so it doesn't try to open it again later
+    return 0;
+}
