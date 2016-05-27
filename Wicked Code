@@ -24,36 +24,39 @@ extern "C" int connect_to_server(char server_addr[15], int port);
 extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 //Constant variables.
-int speed = 40;
-int turn_sharpness = 40;
+int speed = 60;
+int turn_sharpness = 80;
 char luminosity_threshold = 127;
 bool throughGate = false;
 int openGate();
 float locate_line();
 bool seeLine = true;
-int frontReading = 0;
-int backCount = 0;
 int row = 160;
 int main()
 {
     init(0);
     set_motor(1, 0);
     set_motor(2, 0);
-    float proportional_error;
+    float proportional_error = 0;
     float error;
     while(true)
     {
 
 
-        error = locate_line(); //Find the proportional error of the line by using the locate_line method. Parameter is the row of the image to use.
-        //Make sure the locate line method is returning a legitimate value, the value should be between +1 and -1.
-        if (proportional_error > 1 || proportional_error < -1)
+        error = locate_line();
+
+        if (error > 1 || error < -1)
         {
             printf("Exception - Locate line function failed.");
             return 0;
         }
-        //if (proportional_error > 0.8 || proportional_error < -0.8){}
-        //proportional_error = proportional_error*proportional_error;
+
+        if (read_digital(0) > 127 && throughGate == false)
+        {
+            openGate();
+        }
+
+
 
         if (seeLine)
         {
@@ -67,20 +70,18 @@ int main()
         {
             if(proportional_error > 0)
             {
-                set_motor(1,-50);
-                set_motor(2,50);
+                set_motor(1,-60);
+                set_motor(2,60);
             }
             else
             {
-                set_motor(1,50);
-                set_motor(2,-50);
+                set_motor(1,60);
+                set_motor(2,-60);
+
+            }
 
         }
-        /*
-            The left motor should be in port 1, and the right motor in port 2.
-            A negative error indicates the robot has to turn left.
-            A positive error indicates the robot has to turn right.
-            */
+
     }
     set_motor(1, 0);
     set_motor(2, 0);
@@ -119,7 +120,11 @@ float locate_line()
     {
         seeLine = false;
         return 0;
+    }else if (number >= 100){
+        seeLine = true;
+        return 0;
     }
+
     seeLine = true;
     return weight_average; //Returns the average for the locate_line method.
 }
