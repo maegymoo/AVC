@@ -1,0 +1,297 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <time.h>
+#include <string.h>
+
+//sudo gcc -Wall
+
+//Initialization methods.
+extern "C" int init_hardware();
+extern "C" int init(int d_lev);
+
+//Camera methods.
+extern "C" int take_picture();
+extern "C" char get_pixel(int row, int col, int color);
+extern "C" void set_pixel(int col, int row, char red, char green, char blue);
+
+//Motor method.
+extern "C" int set_motor(int motor,int speed);
+
+//Utility methods.
+extern "C" int read_analog(int ch_adc);
+extern "C" int Sleep(int sec, int usec);
+extern "C" int select_IO(int chan, int direct);
+extern "C" int write_digital(int chan, char level);
+extern "C" int read_digital(int chan);
+extern "C" int set_PWM(int chan, int value);
+
+//Server methods.
+extern "C" int connect_to_server(char server_addr[15], int port);
+extern "C" int send_to_server(char message[24]);
+extern "C" int receive_from_server(char message[24]);
+
+//Constant variables.
+int speed = 70;
+int turn_sharpness = 50;
+char luminosity_threshold = 127;
+
+//Other variables as needed
+
+bool throughGate = false;
+bool turnLeft = false;
+bool  openGate();
+bool startMaze = false;
+float locate_line();
+bool seeLine = true;
+int frontReading = 0;
+int leftReading = 0;
+int rightReading = 0;
+float previous_error = 0;
+int row = 160;
+
+//Main movement code
+
+int main()
+{
+    init(0);
+
+    set_motor(1, 0);
+    set_motor(2, 0);
+
+    float proportional_error;
+    //throughGate = openGate();
+
+    while(true)
+    {
+
+
+        proportional_error = locate_line(); //Find the proportional error of the line by using the locate_line method. Parameter is the row of the image to use.
+        printf("Proportional Error: %f\n", proportional_error);
+        printf("Previous Error: %f\n",previous_error);
+        //Make sure the locate line method is returning a legitimate value, the value should be between +1 and -1.
+
+        if (proportional_error > 1 || proportional_error < -1)
+        {
+            printf("Exception - Locate line function failed.");
+            return 0;
+        }
+
+        if (proportional_error != 0 || seeLine == true)
+        {
+            set_motor(1, speed - (proportional_error * turn_sharpness));
+            set_motor(2, speed + (proportional_error * turn_sharpness));
+            previous_error = proportional_error;
+        }
+
+        else if (proportional_error == 0 && seeLine == false)
+        {
+            if (previous_error > 0)  	//Line was last seen on the right
+            {
+                set_motor(1, -50);
+                set_motor(2, 50);
+                printf("Turning right\n");
+                //set_motor(1, speed+(previous_error*turn_sharpness));
+                //set_motor(2, -(speed+(previous_error*turn_sharpness)));
+            }
+            else if (previous_error < 0)
+            {
+                set_motor(1, 50);
+                set_motor(2, -50);
+                printf("Turning left\n");
+            }
+        }
+        else if (turnLeft == true)
+        {
+            printf("Turn Left now, Comrade\n");
+            set_motor(1,50);
+            set_motor(2,-50);
+            turnLeft = false;
+        }
+
+        /*
+            The left motor should be in port 2, and the right motor in port 1.
+
+            A negative error indicates the robot has to turn left.
+            A positive error indicates the robot has to turn right.
+            */
+
+
+        rightReading = read_analog(1);
+        if (rightReading > 350 && throughGate == false)
+        {
+            set_motor(1,0);
+            set_motor(2,0);
+            Sleep(0,7000);
+            throughGate = openGate();
+        }
+        if (startMaze == true)
+        {
+            int front_reading;
+            int right_reading;
+            int left_reading;
+            front_reading = read_analog(0);
+            right_reading = read_analog(1);
+            left_reading = read_analog(2);
+
+            while(true)
+            {
+                front_reading = read_analog(0);
+                right_reading = read_analog(1);
+                left_reading = read_analog(2);
+                int ideal = 525;
+                int base_speed = 50;
+                int error_prior = 0;
+                int error = ideal - right_reading;
+                printf("error: %d\n", error);
+                printf("right reading: %d\n", right_reading);
+                printf("front: %d\n", front_reading);
+                double kp = 0.2;
+                double kd = 0.015;
+                int motor_speed = kp*error + kd*(error-error_prior);
+                printf("motor speed: %d\n", motor_speed);
+                int left_speed = base_speed - motor_speed;
+                int right_speed = base_speed + motor_speed;
+                printf("left speed: %d\n", left_speed);
+                printf("right speed: %d\n", right_speed);
+
+                if (right_speed>100)
+                {
+                    right_speed = 100;
+                }
+                if (right_speed<0)
+                {
+                    right_speed = 0;
+                }
+                if (left_speed>100)
+                {
+                    left_speed = 100;
+                }
+                if (left_speed<0)
+                {
+                    left_speed = 0;
+                }
+                if (front_reading>300)
+                {
+                    set_motor(1, 100);
+                    set_motor(2, 0);
+                    Sleep(0,40000);
+                }
+                else
+                {
+                    set_motor(1, left_speed);
+                    set_motor(2, right_speed);
+                    error_prior = error;
+                }
+            }
+        }
+    }
+
+    set_motor(1, 0);
+    set_motor(2, 0);
+
+    return 0;
+
+}
+
+/*
+This method takes a picture, and uses the luminosity of each of the pixels to determine where the line is.
+The error will be returned in the range -1 to +1.
+*/
+
+float locate_line()
+{
+
+    int row = 160;
+
+    char luminosity;
+
+    float weight = 0;
+    float weight_sum = 0;
+    float number = 0;
+    float weight_average = 0;
+
+    take_picture();
+
+    /*
+    The loop below sums the weights of the bright pixels,
+    then finds an average by dividing by the number of bright pixels.
+
+    A negative average indicates the robot has to turn left,
+    a positive average indicate the robot has to turn right.
+    */
+
+    for(int i = 0; i < 320; i++)
+    {
+
+        luminosity = get_pixel(i, row, 3); //Gets luminosity of pixel from desired row, and from columns 1 to 320.
+
+        weight = (i/159.5) - 1; //Sets appropriate weight value. Equation is set up to range from -1 to +1.
+
+        if(luminosity > luminosity_threshold)
+        {
+
+            weight_sum = weight_sum + weight; //Adds the pixels weight to the weight_sum if the pixel is bright enough.
+            number++; //Increments number of bright pixels so we can calculate the average later.
+
+        }
+
+    }
+    printf("%d\n",number);
+
+    weight_average = weight_sum / number; //Calculates the average of the weighted luminosity values.
+    if (number <= 1)
+    {
+        leftReading = read_analog(1);
+        printf("left reading: %d\n", leftReading);
+        rightReading = read_analog(2);
+        printf("right reading: %d\n", rightReading);
+
+        rightReading = read_analog(1);
+        if (rightReading > 350)
+        {
+            startMaze = true;
+        }
+
+        seeLine = false;
+        return 0;
+    }
+    else if (number >= 200)
+    {
+        set_motor(1,50);
+        set_motor(2,-50);
+        Sleep(0,5000);
+        printf("Turning Left - The Hard Way\n");
+        //turnLeft = true;
+        //seeLine = true;
+    }
+
+    seeLine = true;
+    return weight_average; //Returns the average for the locate_line method.
+
+}
+
+
+bool openGate()
+{
+    char server_addr[15];
+    //stores as a string
+    sprintf(server_addr,"130.195.6.196");
+    //connects to server with ip address 130.195.6.196
+    connect_to_server(server_addr, 1024);
+    char server_msg[24];
+    //stores string
+    sprintf(server_msg,"Please");
+    //sends server_msg to server
+    send_to_server(server_msg);
+    char pw[6];
+    //receives gate pw from server
+    receive_from_server(pw);
+    //prints the password
+    printf("pswd=%s\n",pw);
+    //sends pw back to server
+    send_to_server(pw);
+    //and voila gate opens!!
+    throughGate = true;
+    //tells the pi that we're through the gate, so it doesn't try to open it again later
+    return true;
+}
