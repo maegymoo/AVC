@@ -1,0 +1,74 @@
+# include <stdio.h>
+# include <time.h>
+# include <string.h>
+# include <pthread.h>
+
+extern "C" int init(int d_lev);
+extern "C" int read_analog(int ch_adc);
+extern "C" int Sleep(int sec, int usec);
+extern "C" int set_motor(int motor, int speed);
+
+int main ()
+{
+
+    init(0);
+    int front_reading;
+    int right_reading;
+    int left_reading;
+    front_reading = read_analog(0);
+    right_reading = read_analog(1);
+    left_reading = read_analog(2);
+
+    while(true)
+    {
+        front_reading = read_analog(0);
+        right_reading = read_analog(1);
+        left_reading = read_analog(2);
+        int ideal = 525;
+        int base_speed = 50;
+        int error_prior = 0;
+        int error = ideal - right_reading;
+        printf("error: %d\n", error);
+        printf("right reading: %d\n", right_reading);
+        printf("front: %d\n", front_reading);
+        double kp = 0.2;
+        double kd = 0.015;
+        int motor_speed = kp*error + kd*(error-error_prior);
+        printf("motor speed: %d\n", motor_speed);
+        int left_speed = base_speed - motor_speed;
+        int right_speed = base_speed + motor_speed;
+        printf("left speed: %d\n", left_speed);
+        printf("right speed: %d\n", right_speed);
+
+        if (right_speed>100)
+        {
+            right_speed = 100;
+        }
+        if (right_speed<0)
+        {
+            right_speed = 0;
+        }
+        if (left_speed>100)
+        {
+            left_speed = 100;
+        }
+        if (left_speed<0)
+        {
+            left_speed = 0;
+        }
+       if (front_reading>300){
+        set_motor(1, 100);
+        set_motor(2, 0);
+        Sleep(0,40000);
+       }
+       else {
+        set_motor(1, left_speed);
+        set_motor(2, right_speed);
+        error_prior = error;
+       }
+    }
+
+    set_motor(1, 0);
+    set_motor(2, 0);
+    return 0;
+}
