@@ -15,9 +15,9 @@ ENGR101 Autonomous Vehicle Challenge
 | 4 | 11th May | Complete Quadrant 2 | **AVC Progress Report** (12:00pm 16/5) | COMP102 Test (6:00pm 11/5)| [Tasklist & Review] (/WeeklyUpdate/Week 4.md) |
 | 5 | 18th May | Complete Quadrant 3 | | ENGR121 Test (10:00am 20/5) | [Tasklist & Review] (/WeeklyUpdate/Week 5.md) |
 | 6 | 25th May | Complete Quadrant 4 | | | [Tasklist & Review] (/WeeklyUpdate/Week 6.md) |
-| 7 | 30th May | Complete full course | **Robot** | ENGR101 Test (12:00pm 30/5) | [Tasklist & Review] (/WeeklyUpdate/Week 7.md) |
-| 8 | 8th June | Work on AVC Reports | | | [Tasklist & Review] (/WeeklyUpdate/Week 8.md) |
-| 9 | 13th June | Finish AVC Reports | **Final AVC Project report** (12:00pm 13/6) | ENGR121 Exam (9:30am 14/6)| [Tasklist & Review] (/WeeklyUpdate/Week 9.md) |
+| 7 | 30th May | Complete full course | **Robot** | ENGR101 Test (12:00pm 30/5) |  |
+| 8 | 8th June | Work on AVC Reports | | | |
+| 9 | 13th June | Finish AVC Reports | **Final AVC Project report** (12:00pm 13/6) | ENGR121 Exam (9:30am 14/6)| |
 
 ###Weekly progress checklist for review
 
